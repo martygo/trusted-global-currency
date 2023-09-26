@@ -15,7 +15,7 @@ export default function Balance() {
 					<BalanceCard
 						label="EUR"
 						currency="$"
-						value="0,00"
+						value="80,00"
 						icon={{
 							name: "Euro",
 							color: "red",
@@ -25,7 +25,7 @@ export default function Balance() {
 					<BalanceCard
 						label="DOLLAR"
 						currency="$"
-						value="0,00"
+						value="100,00"
 						icon={{
 							name: "DollarSign",
 							color: "red",
@@ -35,7 +35,7 @@ export default function Balance() {
 					<BalanceCard
 						label="AOA"
 						currency="$"
-						value="0,00"
+						value="6.000,00"
 						icon={{
 							name: "Banknote",
 							color: "red",

@@ -1,10 +1,37 @@
 "use client";
 
+import { useState } from "react";
+
 import * as Dialog from "@radix-ui/react-dialog";
+
+import { currencies } from "../../data/currencies.data";
+
 import Combobox from "../common/Combobox";
 import Icon from "../common/Icon";
+import Input from "../common/Input";
 
 export default function ConverterCurrency() {
+	const [inputCurrency, setInputCurrency] = useState<number>(0);
+	const [currencySource, setCurrencySource] = useState<string>("");
+	const [currencyTarget, setCurrencyTarget] = useState<string>("");
+
+	function getInput(event: React.ChangeEvent<HTMLInputElement>) {
+		const inputCurrency = event.target.value;
+
+		if (inputCurrency === "") {
+			console.log("vazio");
+			return;
+		}
+
+		if (inputCurrency.length >= 1) {
+			setInputCurrency(Number(inputCurrency));
+		}
+	}
+
+	function handleConvert() {
+		console.log(inputCurrency, currencySource, currencyTarget);
+	}
+
 	return (
 		<div className="w-full flex justify-center items-center mb-4">
 			<Dialog.Root>
@@ -32,22 +59,31 @@ export default function ConverterCurrency() {
 
 						<div className="flex gap-4 mb-[15px]">
 							<fieldset>
-								<input
-									className="text-violet11 shadow-violet7 focus:shadow-violet8 inline-flex h-[35px] w-full flex-1 items-center justify-center rounded-[4px] px-[10px] text-[15px] leading-none shadow-[0_0_0_1px] outline-none focus:shadow-[0_0_0_2px]"
-									id="name"
-									defaultValue="Pedro Duarte"
+								<Input type="number" onChange={getInput} />
+							</fieldset>
+							<fieldset>
+								<Combobox
+									data={currencies}
+									state={currencySource}
+									onValueChange={(value) => setCurrencySource(value)}
 								/>
 							</fieldset>
 							<fieldset>
-								<Combobox />
-							</fieldset>
-							<fieldset>
-								<Combobox />
+								<Combobox
+									data={currencies}
+									state={currencyTarget}
+									onValueChange={(value) => setCurrencyTarget(value)}
+								/>
 							</fieldset>
 						</div>
 
 						<div className="mt-[25px] flex justify-end">
-							<button className="bg-green4 text-green11 hover:bg-green5 focus:shadow-green7 inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-medium leading-none focus:shadow-[0_0_0_2px] focus:outline-none">
+							<button
+								className="bg-green4 text-green11 hover:bg-green5 focus:shadow-green7 
+                                inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] 
+                                font-medium leading-none focus:shadow-[0_0_0_2px] focus:outline-none"
+								onClick={handleConvert}
+							>
 								Converter
 							</button>
 						</div>
