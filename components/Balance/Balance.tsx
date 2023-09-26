@@ -1,4 +1,5 @@
 import ConverterCurrency from "../ConverterCurrency/ConverterCurrency";
+import BalanceAdd from "./BalanceAdd";
 import BalanceCard from "./BalanceCard";
 
 export default function Balance() {
@@ -8,7 +9,10 @@ export default function Balance() {
 				Trusted Global Currency Converter
 			</h3>
 
-			<ConverterCurrency />
+			<div className="w-full flex justify-center items-center gap-6 mb-4">
+				<BalanceAdd />
+				<ConverterCurrency />
+			</div>
 
 			<div className="flex justify-center items-center">
 				<div className="flex flex-col lg:flex-row gap-6">
