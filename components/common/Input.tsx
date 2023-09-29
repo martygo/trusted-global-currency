@@ -1,6 +1,6 @@
-interface InputProps {
-	type?: string;
-	onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+interface InputProps
+	extends React.InputHTMLAttributes<HTMLInputElement> {
+	onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export default function Input({ type, onChange }: InputProps) {
