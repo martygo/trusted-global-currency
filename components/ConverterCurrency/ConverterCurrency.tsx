@@ -4,11 +4,11 @@ import { useState } from "react";
 
 import * as Dialog from "@radix-ui/react-dialog";
 
-import { currencies } from "../../data/currencies.data";
+import { currencies } from "data/currencies.data";
 
-import Combobox from "../common/Combobox";
-import Icon from "../common/Icon";
-import Input from "../common/Input";
+import Combobox from "components/common/Combobox";
+import Icon from "components/common/Icon";
+import Input from "components/common/Input";
 
 export default function ConverterCurrency() {
 	const [inputCurrency, setInputCurrency] = useState<number>(0);

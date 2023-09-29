@@ -1,8 +1,28 @@
-import ConverterCurrency from "../ConverterCurrency/ConverterCurrency";
+import ConverterCurrency from "components/ConverterCurrency/ConverterCurrency";
+
 import BalanceAdd from "./BalanceAdd";
 import BalanceCard from "./BalanceCard";
 
-export default function Balance() {
+type balanceSupabase = {
+	id: number;
+	value: number;
+	wallet_currency: string;
+};
+interface BalanceProps {
+	balance: balanceSupabase[];
+}
+
+export default function Balance({ balance }: BalanceProps) {
+	const eurBalance = filterBalance("eur");
+	const dollarBalance = filterBalance("usd");
+	const kwanzaBalance = filterBalance("aoa");
+
+	function filterBalance(currency: string) {
+		return balance.filter((item) => {
+			return item.wallet_currency === currency;
+		});
+	}
+
 	return (
 		<div>
 			<h3 className="text-center py-[4rem] px-2 lg:px-0 text-white font-sans font-bold text-3xl">
@@ -19,7 +39,7 @@ export default function Balance() {
 					<BalanceCard
 						label="EUR"
 						currency="$"
-						value="80,00"
+						value={eurBalance[0].value.toString()}
 						icon={{
 							name: "Euro",
 							color: "red",
@@ -29,7 +49,7 @@ export default function Balance() {
 					<BalanceCard
 						label="DOLLAR"
 						currency="$"
-						value="100,00"
+						value={dollarBalance[0].value.toString()}
 						icon={{
 							name: "DollarSign",
 							color: "red",
@@ -39,7 +59,7 @@ export default function Balance() {
 					<BalanceCard
 						label="AOA"
 						currency="$"
-						value="6.000,00"
+						value={kwanzaBalance[0].value.toString()}
 						icon={{
 							name: "Banknote",
 							color: "red",

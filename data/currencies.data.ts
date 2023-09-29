@@ -1,4 +1,4 @@
-import { ComboboxDataProps } from "../components/common/Combobox";
+import { ComboboxDataProps } from "components/common/Combobox";
 
 export const currencies: ComboboxDataProps[] = [
 	{
