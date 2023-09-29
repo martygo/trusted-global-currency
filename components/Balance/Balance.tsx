@@ -1,5 +1,11 @@
 import ConverterCurrency from "components/ConverterCurrency/ConverterCurrency";
 
+import {
+	formatCurrencyToDollar,
+	formatCurrencyToEur,
+	formatCurrencyToKwanza,
+} from "@/utils/CurrencyFormat";
+
 import BalanceAdd from "./BalanceAdd";
 import BalanceCard from "./BalanceCard";
 
@@ -38,8 +44,7 @@ export default function Balance({ balance }: BalanceProps) {
 				<div className="flex flex-col lg:flex-row gap-6">
 					<BalanceCard
 						label="EUR"
-						currency="$"
-						value={eurBalance[0].value.toString()}
+						value={formatCurrencyToEur(eurBalance[0].value)}
 						icon={{
 							name: "Euro",
 							color: "red",
@@ -48,8 +53,7 @@ export default function Balance({ balance }: BalanceProps) {
 					/>
 					<BalanceCard
 						label="DOLLAR"
-						currency="$"
-						value={dollarBalance[0].value.toString()}
+						value={formatCurrencyToDollar(dollarBalance[0].value)}
 						icon={{
 							name: "DollarSign",
 							color: "red",
@@ -58,8 +62,7 @@ export default function Balance({ balance }: BalanceProps) {
 					/>
 					<BalanceCard
 						label="AOA"
-						currency="$"
-						value={kwanzaBalance[0].value.toString()}
+						value={formatCurrencyToKwanza(kwanzaBalance[0].value)}
 						icon={{
 							name: "Banknote",
 							color: "red",
