@@ -29,6 +29,21 @@ export default function Balance({ balance }: BalanceProps) {
 		});
 	}
 
+	const balanceValue = {
+		eur: {
+			value: eurBalance[0].value,
+			label: "eur",
+		},
+		dollar: {
+			value: dollarBalance[0].value,
+			label: "usd",
+		},
+		kwanza: {
+			value: kwanzaBalance[0].value,
+			label: "aoa",
+		},
+	};
+
 	return (
 		<div>
 			<h3 className="text-center py-[4rem] px-2 lg:px-0 text-white font-sans font-bold text-3xl">
@@ -36,7 +51,7 @@ export default function Balance({ balance }: BalanceProps) {
 			</h3>
 
 			<div className="w-full flex justify-center items-center gap-6 mb-4">
-				<BalanceAdd />
+				<BalanceAdd balances={balanceValue} />
 				<ConverterCurrency />
 			</div>
 

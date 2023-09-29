@@ -4,15 +4,37 @@ import { useState } from "react";
 
 import * as Dialog from "@radix-ui/react-dialog";
 
-import { currencies } from "data/currencies.data";
+import supabaseClient from "@/config/supabase";
+import { currencies } from "@/data/currencies.data";
 
 import Combobox from "components/common/Combobox";
 import Icon from "components/common/Icon";
 import Input from "components/common/Input";
 
-export default function BalanceAdd() {
+type CurrenciesType = {
+	eur: {
+		value: number;
+		label: string;
+	};
+	dollar: {
+		value: number;
+		label: string;
+	};
+	kwanza: {
+		value: number;
+		label: string;
+	};
+};
+
+interface BalanceAddProps {
+	balances: CurrenciesType;
+}
+
+export default function BalanceAdd({ balances }: BalanceAddProps) {
 	const [inputCurrency, setInputCurrency] = useState<number>(0);
 	const [currencySource, setCurrencySource] = useState<string>("");
+
+	const { eur, dollar, kwanza } = balances;
 
 	function getInput(event: React.ChangeEvent<HTMLInputElement>) {
 		const inputCurrency = event.target.value;
@@ -27,8 +49,45 @@ export default function BalanceAdd() {
 		}
 	}
 
-	function handleAddBalance() {
-		console.log(inputCurrency, currencySource);
+	async function postData(value: number, wallet_currency: string) {
+		const supabase = supabaseClient();
+
+		const { data, error } = await supabase
+			.from("balance")
+			.update({ value })
+			.eq("wallet_currency", wallet_currency)
+			.select();
+
+		if (data) {
+			console.log("data: ", data);
+		}
+
+		if (error) {
+			console.log("error: ", error);
+		}
+	}
+
+	async function handleAddBalance() {
+		if (currencySource === "eur") {
+			const value = eur.value + inputCurrency;
+			const label = eur.label;
+
+			await postData(value, label);
+		}
+
+		if (currencySource === "usd") {
+			const value = dollar.value + inputCurrency;
+			const label = dollar.label;
+
+			await postData(value, label);
+		}
+
+		if (currencySource === "aoa") {
+			const value = kwanza.value + inputCurrency;
+			const label = kwanza.label;
+
+			await postData(value, label);
+		}
 	}
 
 	return (
