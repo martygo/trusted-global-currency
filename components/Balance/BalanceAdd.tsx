@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import * as Dialog from "@radix-ui/react-dialog";
@@ -34,6 +35,8 @@ export default function BalanceAdd({ balances }: BalanceAddProps) {
 	const [inputCurrency, setInputCurrency] = useState<number>(0);
 	const [currencySource, setCurrencySource] = useState<string>("");
 
+	const router = useRouter();
+
 	const { eur, dollar, kwanza } = balances;
 
 	function getInput(event: React.ChangeEvent<HTMLInputElement>) {
@@ -59,7 +62,7 @@ export default function BalanceAdd({ balances }: BalanceAddProps) {
 			.select();
 
 		if (data) {
-			console.log("data: ", data);
+			router.refresh();
 		}
 
 		if (error) {
@@ -129,14 +132,16 @@ export default function BalanceAdd({ balances }: BalanceAddProps) {
 						</div>
 
 						<div className="mt-[25px] flex justify-end">
-							<button
-								className="bg-green4 text-green11 hover:bg-green5 focus:shadow-green7 
+							<Dialog.Close asChild>
+								<button
+									className="bg-green4 text-green11 hover:bg-green5 focus:shadow-green7 
                                 inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] 
                                 font-medium leading-none focus:shadow-[0_0_0_2px] focus:outline-none"
-								onClick={handleAddBalance}
-							>
-								Adicionar
-							</button>
+									onClick={handleAddBalance}
+								>
+									Adicionar
+								</button>
+							</Dialog.Close>
 						</div>
 
 						<Dialog.Close asChild>
