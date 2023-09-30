@@ -6,30 +6,41 @@ import * as Dialog from "@radix-ui/react-dialog";
 
 import { currencies } from "data/currencies.data";
 
+import { formatCurrencyToKwanza } from "@/utils/CurrencyFormat";
 import Combobox from "components/common/Combobox";
 import Icon from "components/common/Icon";
 import Input from "components/common/Input";
 
 export default function ConverterCurrency() {
-	const [inputCurrency, setInputCurrency] = useState<number>(0);
+	const [amount, setAmount] = useState<number>(0);
+	const [exchangeRate, setExchangeRate] = useState<number>(0);
 	const [currencySource, setCurrencySource] = useState<string>("");
 	const [currencyTarget, setCurrencyTarget] = useState<string>("");
 
-	function getInput(event: React.ChangeEvent<HTMLInputElement>) {
-		const inputCurrency = event.target.value;
+	const [amountConverted, setAmountConverted] =
+		useState<string>("Indisponível");
 
-		if (inputCurrency === "") {
-			console.log("vazio");
-			return;
-		}
+	function discountRecharge(amount: number) {
+		return amount * 0.02;
+	}
 
-		if (inputCurrency.length >= 1) {
-			setInputCurrency(Number(inputCurrency));
-		}
+	function discountIVA(amount: number) {
+		return amount * 0.0028;
+	}
+
+	function discountTotal(amount: number) {
+		return discountRecharge(amount) + discountIVA(amount);
+	}
+
+	function convertFromKwanzaTo(amount: number, rate: number) {
+		return amount / rate;
 	}
 
 	function handleConvert() {
-		console.log(inputCurrency, currencySource, currencyTarget);
+		const total = discountTotal(amount);
+		const converted = convertFromKwanzaTo(amount, exchangeRate);
+
+		setAmountConverted(formatCurrencyToKwanza(converted));
 	}
 
 	return (
@@ -47,7 +58,13 @@ export default function ConverterCurrency() {
 
 				<Dialog.Portal>
 					<Dialog.Overlay className="bg-blackA9 data-[state=open]:animate-overlayShow fixed inset-0" />
-					<Dialog.Content className="data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-[25px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none">
+					<Dialog.Content
+						className="data-[state=open]:animate-contentShow fixed top-[50%] 
+						left-[50%] max-h-[85vh] w-[33rem] translate-x-[-50%] rounded-[6px] bg-white p-[25px]
+						focus:outline-none translate-y-[-50%] 
+						shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px]
+						"
+					>
 						<Dialog.Title className="text-mauve12 m-0 text-[17px] font-medium">
 							Converter Currency
 						</Dialog.Title>
@@ -57,19 +74,50 @@ export default function ConverterCurrency() {
 							Transactions are based on the current exchange rate.
 						</Dialog.Description>
 
-						<div className="flex gap-4 mb-[15px]">
+						<div className="flex flex-col lg:flex-row gap-4 mb-[15px]">
 							<fieldset>
-								<Input type="number" onChange={getInput} />
+								<label htmlFor="amount">Valor</label>
+								<Input
+									type="number"
+									id="amount"
+									name="amount"
+									onChange={(
+										e: React.ChangeEvent<HTMLInputElement>,
+									) => setAmount(Number(e.target.value))}
+								/>
 							</fieldset>
+
 							<fieldset>
+								<label htmlFor="exchangeRate">Câmbio</label>
+								<Input
+									type="number"
+									id="exchangeRate"
+									name="exchangeRate"
+									onChange={(
+										e: React.ChangeEvent<HTMLInputElement>,
+									) => setExchangeRate(Number(e.target.value))}
+								/>
+							</fieldset>
+
+							<fieldset>
+								<label htmlFor="from">De</label>
 								<Combobox
-									data={currencies}
+									id="from"
+									data={[
+										{
+											label: "🇦🇴 AOA",
+											value: "aoa",
+										},
+									]}
 									state={currencySource}
 									onValueChange={(value) => setCurrencySource(value)}
 								/>
 							</fieldset>
+
 							<fieldset>
+								<label htmlFor="to">Para</label>
 								<Combobox
+									id="to"
 									data={currencies}
 									state={currencyTarget}
 									onValueChange={(value) => setCurrencyTarget(value)}
@@ -77,7 +125,23 @@ export default function ConverterCurrency() {
 							</fieldset>
 						</div>
 
-						<div className="mt-[25px] flex justify-end">
+						<div className="mt-[25px] w-full flex flex-col gap-4 justify-between">
+							<div className="w-full flex justify-between items-center">
+								<ul className="text-sm font-medium">
+									<li className="mb-4">Valor convertido:</li>
+									<li>Desconto de Carregamento:</li>
+									<li>Desconto IVA:</li>
+									<li>Desconto Total:</li>
+								</ul>
+
+								<ul className="font-normal text-sm">
+									<li className="mb-4">{amountConverted}</li>
+									<li>200,00 A0A</li>
+									<li>28,00 AOA</li>
+									<li>228,00 AOA</li>
+								</ul>
+							</div>
+
 							<button
 								className="bg-green4 text-green11 hover:bg-green5 focus:shadow-green7 
                                 inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] 
