@@ -107,7 +107,7 @@ export default function ConverterCurrency({
 
 		const historyData: any = [
 			{
-				value_ao: amount,
+				value_aoa: amount,
 				value_eur: updateWallets.eur,
 				value_dollar: updateWallets.dollar,
 			},
