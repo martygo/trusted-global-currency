@@ -6,14 +6,15 @@ import { useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 
 import { Exchange } from "@/core/Exchange";
+import { Queries } from "@/core/Queries";
+
 import {
 	formatCurrencyToDollar,
 	formatCurrencyToEur,
 	formatCurrencyToKwanza,
 } from "@/utils/CurrencyFormat";
-import { BalanceAddProps } from "components/Balance/BalanceAdd";
 
-import supabaseClient from "@/config/supabase";
+import { BalanceAddProps } from "components/Balance/BalanceAdd";
 import Icon from "components/common/Icon";
 import Input from "components/common/Input";
 import Button from "../common/Button";
@@ -54,27 +55,23 @@ export default function ConverterCurrency({
 	const { eur, dollar, kwanza } = balances;
 
 	async function updateData(
+		balance: string,
 		value: number | string,
 		wallet_currency: string,
 	) {
-		const supabase = supabaseClient();
-
-		const { data, error } = await supabase
-			.from("balance")
-			.update({ value })
-			.eq("wallet_currency", wallet_currency)
-			.select();
+		const data = await Queries.update(balance, value, {
+			key: "wallet_currency",
+			value: wallet_currency,
+		});
 
 		if (data) {
 			router.refresh();
 		}
-
-		if (error) {
-			console.log("error: ", error);
-		}
 	}
 
 	async function handleAddBalanceToWallet() {
+		const TB_BALANCE = "balance";
+
 		const convertedToUSD = Exchange.convertFromKwanzaTo(
 			amount,
 			exchangeRateUSD,
@@ -102,15 +99,33 @@ export default function ConverterCurrency({
 		const { value: valueEur, label: labelEur } = eur;
 		const { value: valueDollar, label: labelDollar } = dollar;
 
-		const updateWallets = {
+		const updateWallets: any = {
 			kwanza: valueKwanza - amount,
 			eur: valueEur + convertedToEUR,
 			dollar: valueDollar + convertedToUSD,
 		};
 
-		await updateData(updateWallets.kwanza, labelKwanza);
-		await updateData(updateWallets.eur.toFixed(2), labelEur);
-		await updateData(updateWallets.dollar.toFixed(2), labelDollar);
+		const historyData: any = [
+			{
+				value_ao: amount,
+				value_eur: updateWallets.eur,
+				value_dollar: updateWallets.dollar,
+			},
+		];
+
+		await updateData(TB_BALANCE, updateWallets.kwanza, labelKwanza);
+		await updateData(
+			TB_BALANCE,
+			updateWallets.eur.toFixed(2),
+			labelEur,
+		);
+		await updateData(
+			TB_BALANCE,
+			updateWallets.dollar.toFixed(2),
+			labelDollar,
+		);
+
+		await Queries.insert("transactions", historyData);
 	}
 
 	return (

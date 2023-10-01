@@ -5,7 +5,7 @@ import { useState } from "react";
 
 import * as Dialog from "@radix-ui/react-dialog";
 
-import supabaseClient from "@/config/supabase";
+import { Queries } from "@/core/Queries";
 
 import Button from "components/common/Button";
 import Icon from "components/common/Icon";
@@ -52,29 +52,28 @@ export default function BalanceAdd({ balances }: BalanceAddProps) {
 		}
 	}
 
-	async function postData(value: number, wallet_currency: string) {
-		const supabase = supabaseClient();
-
-		const { data, error } = await supabase
-			.from("balance")
-			.update({ value })
-			.eq("wallet_currency", wallet_currency)
-			.select();
+	async function postData(
+		balance: string,
+		value: number,
+		wallet_currency: string,
+	) {
+		const data = await Queries.update(balance, value, {
+			key: "wallet_currency",
+			value: wallet_currency,
+		});
 
 		if (data) {
 			router.refresh();
 		}
-
-		if (error) {
-			console.log("error: ", error);
-		}
 	}
 
 	async function handleAddBalance() {
+		const TB_BALANCE = "balance";
+
 		const value = kwanza.value + inputAmount;
 		const label = "aoa";
 
-		await postData(value, label);
+		await postData(TB_BALANCE, value, label);
 	}
 
 	return (
