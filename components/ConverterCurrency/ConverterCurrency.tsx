@@ -6,10 +6,17 @@ import * as Dialog from "@radix-ui/react-dialog";
 
 import { currencies } from "data/currencies.data";
 
+import { Exchange } from "@/core/Exchange";
 import { formatCurrencyToKwanza } from "@/utils/CurrencyFormat";
 import Combobox from "components/common/Combobox";
 import Icon from "components/common/Icon";
 import Input from "components/common/Input";
+
+type InfoOperationalCharges = {
+	recharge: string;
+	iva: string;
+	total: string;
+};
 
 export default function ConverterCurrency() {
 	const [amount, setAmount] = useState<number>(0);
@@ -18,29 +25,30 @@ export default function ConverterCurrency() {
 	const [currencyTarget, setCurrencyTarget] = useState<string>("");
 
 	const [amountConverted, setAmountConverted] =
-		useState<string>("Indisponível");
+		useState<string>("0,00");
 
-	function discountRecharge(amount: number) {
-		return amount * 0.02;
-	}
-
-	function discountIVA(amount: number) {
-		return amount * 0.0028;
-	}
-
-	function discountTotal(amount: number) {
-		return discountRecharge(amount) + discountIVA(amount);
-	}
-
-	function convertFromKwanzaTo(amount: number, rate: number) {
-		return amount / rate;
-	}
+	const [infoOperationalCharges, setInfoOperationalCharges] =
+		useState<InfoOperationalCharges>({
+			recharge: "0,00",
+			iva: "0,00",
+			total: "0,00",
+		} as InfoOperationalCharges);
 
 	function handleConvert() {
-		const total = discountTotal(amount);
-		const converted = convertFromKwanzaTo(amount, exchangeRate);
+		const converted = Exchange.convertFromKwanzaTo(
+			amount,
+			exchangeRate,
+		);
 
 		setAmountConverted(formatCurrencyToKwanza(converted));
+
+		setInfoOperationalCharges({
+			recharge: formatCurrencyToKwanza(
+				Exchange.discountRecharge(amount),
+			),
+			iva: formatCurrencyToKwanza(Exchange.discountIVA(amount)),
+			total: formatCurrencyToKwanza(Exchange.discountTotal(amount)),
+		});
 	}
 
 	return (
@@ -136,9 +144,9 @@ export default function ConverterCurrency() {
 
 								<ul className="font-normal text-sm">
 									<li className="mb-4">{amountConverted}</li>
-									<li>200,00 A0A</li>
-									<li>28,00 AOA</li>
-									<li>228,00 AOA</li>
+									<li>{infoOperationalCharges.recharge}</li>
+									<li>{infoOperationalCharges.iva}</li>
+									<li>{infoOperationalCharges.total}</li>
 								</ul>
 							</div>
 
