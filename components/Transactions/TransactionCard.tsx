@@ -43,7 +43,7 @@ export default function TransactionCard({
 							<AlertDialog.Cancel asChild>
 								<button
 									className="text-mauve11 bg-mauve4 hover:bg-mauve5 
-								  focus:shadow-mauve7 inline-flex h-[35px] items-center justify-center 
+									focus:shadow-mauve7 inline-flex h-[35px] items-center justify-center 
 									rounded-[4px] px-[15px] font-medium leading-none outline-none 
 									focus:shadow-[0_0_0_2px]"
 								>
