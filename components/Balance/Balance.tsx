@@ -52,7 +52,7 @@ export default function Balance({ balance }: BalanceProps) {
 
 			<div className="w-full flex justify-center items-center gap-6 mb-4">
 				<BalanceAdd balances={balanceValue} />
-				<ConverterCurrency />
+				<ConverterCurrency balances={balanceValue} />
 			</div>
 
 			<div className="flex justify-center items-center">

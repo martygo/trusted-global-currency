@@ -1,13 +1,16 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import * as Dialog from "@radix-ui/react-dialog";
 
-import { currencies } from "data/currencies.data";
-
 import { Exchange } from "@/core/Exchange";
 import { formatCurrencyToKwanza } from "@/utils/CurrencyFormat";
+import { BalanceAddProps } from "components/Balance/BalanceAdd";
+import { currencies } from "data/currencies.data";
+
+import supabaseClient from "@/config/supabase";
 import Combobox from "components/common/Combobox";
 import Icon from "components/common/Icon";
 import Input from "components/common/Input";
@@ -18,7 +21,9 @@ type InfoOperationalCharges = {
 	total: string;
 };
 
-export default function ConverterCurrency() {
+export default function ConverterCurrency({
+	balances,
+}: BalanceAddProps) {
 	const [amount, setAmount] = useState<number>(0);
 	const [exchangeRate, setExchangeRate] = useState<number>(0);
 	const [currencySource, setCurrencySource] = useState<string>("");
@@ -34,7 +39,29 @@ export default function ConverterCurrency() {
 			total: "0,00",
 		} as InfoOperationalCharges);
 
-	function handleConvert() {
+	const router = useRouter();
+
+	const { eur, dollar, kwanza } = balances;
+
+	async function updateData(value: number, wallet_currency: string) {
+		const supabase = supabaseClient();
+
+		const { data, error } = await supabase
+			.from("balance")
+			.update({ value })
+			.eq("wallet_currency", wallet_currency)
+			.select();
+
+		if (data) {
+			router.refresh();
+		}
+
+		if (error) {
+			console.log("error: ", error);
+		}
+	}
+
+	async function handleConvert() {
 		const converted = Exchange.convertFromKwanzaTo(
 			amount,
 			exchangeRate,
@@ -49,6 +76,15 @@ export default function ConverterCurrency() {
 			iva: formatCurrencyToKwanza(Exchange.discountIVA(amount)),
 			total: formatCurrencyToKwanza(Exchange.discountTotal(amount)),
 		});
+
+		if (currencySource === "aoa") {
+			const { value, label } = kwanza;
+
+			const newValue = value - amount;
+			const labelSelect = label;
+
+			await updateData(newValue, labelSelect);
+		}
 	}
 
 	return (

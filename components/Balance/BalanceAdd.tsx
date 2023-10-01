@@ -27,7 +27,7 @@ type CurrenciesType = {
 	};
 };
 
-interface BalanceAddProps {
+export interface BalanceAddProps {
 	balances: CurrenciesType;
 }
 
