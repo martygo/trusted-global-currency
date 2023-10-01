@@ -15,9 +15,9 @@ import {
 } from "@/utils/CurrencyFormat";
 
 import { BalanceAddProps } from "components/Balance/BalanceAdd";
+import Button from "components/common/Button";
 import Icon from "components/common/Icon";
 import Input from "components/common/Input";
-import Button from "../common/Button";
 
 type InfoOperationalCharges = {
 	recharge: string;
