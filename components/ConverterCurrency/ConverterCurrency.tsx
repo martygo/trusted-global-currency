@@ -6,14 +6,17 @@ import { useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 
 import { Exchange } from "@/core/Exchange";
-import { formatCurrencyToKwanza } from "@/utils/CurrencyFormat";
+import {
+	formatCurrencyToDollar,
+	formatCurrencyToEur,
+	formatCurrencyToKwanza,
+} from "@/utils/CurrencyFormat";
 import { BalanceAddProps } from "components/Balance/BalanceAdd";
-import { currencies } from "data/currencies.data";
 
 import supabaseClient from "@/config/supabase";
-import Combobox from "components/common/Combobox";
 import Icon from "components/common/Icon";
 import Input from "components/common/Input";
+import Button from "../common/Button";
 
 type InfoOperationalCharges = {
 	recharge: string;
@@ -21,16 +24,23 @@ type InfoOperationalCharges = {
 	total: string;
 };
 
+type CurrenciesConverterType = {
+	eur: string;
+	dollar: string;
+};
+
 export default function ConverterCurrency({
 	balances,
 }: BalanceAddProps) {
 	const [amount, setAmount] = useState<number>(0);
-	const [exchangeRate, setExchangeRate] = useState<number>(0);
-	const [currencySource, setCurrencySource] = useState<string>("");
-	const [currencyTarget, setCurrencyTarget] = useState<string>("");
+	const [exchangeRateUSD, setExchangeRateUSD] = useState<number>(0);
+	const [exchangeRateEUR, setExchangeRateEUR] = useState<number>(0);
 
 	const [amountConverted, setAmountConverted] =
-		useState<string>("0,00");
+		useState<CurrenciesConverterType>({
+			eur: "0,00",
+			dollar: "0,00",
+		} as CurrenciesConverterType);
 
 	const [infoOperationalCharges, setInfoOperationalCharges] =
 		useState<InfoOperationalCharges>({
@@ -43,7 +53,10 @@ export default function ConverterCurrency({
 
 	const { eur, dollar, kwanza } = balances;
 
-	async function updateData(value: number, wallet_currency: string) {
+	async function updateData(
+		value: number | string,
+		wallet_currency: string,
+	) {
 		const supabase = supabaseClient();
 
 		const { data, error } = await supabase
@@ -61,13 +74,21 @@ export default function ConverterCurrency({
 		}
 	}
 
-	async function handleConvert() {
-		const converted = Exchange.convertFromKwanzaTo(
+	async function handleAddBalanceToWallet() {
+		const convertedToUSD = Exchange.convertFromKwanzaTo(
 			amount,
-			exchangeRate,
+			exchangeRateUSD,
 		);
 
-		setAmountConverted(formatCurrencyToKwanza(converted));
+		const convertedToEUR = Exchange.convertFromKwanzaTo(
+			amount,
+			exchangeRateEUR,
+		);
+
+		setAmountConverted({
+			eur: formatCurrencyToEur(convertedToEUR),
+			dollar: formatCurrencyToDollar(convertedToUSD),
+		});
 
 		setInfoOperationalCharges({
 			recharge: formatCurrencyToKwanza(
@@ -77,14 +98,19 @@ export default function ConverterCurrency({
 			total: formatCurrencyToKwanza(Exchange.discountTotal(amount)),
 		});
 
-		if (currencySource === "aoa") {
-			const { value, label } = kwanza;
+		const { value: valueKwanza, label: labelKwanza } = kwanza;
+		const { value: valueEur, label: labelEur } = eur;
+		const { value: valueDollar, label: labelDollar } = dollar;
 
-			const newValue = value - amount;
-			const labelSelect = label;
+		const updateWallets = {
+			kwanza: valueKwanza - amount,
+			eur: valueEur + convertedToEUR,
+			dollar: valueDollar + convertedToUSD,
+		};
 
-			await updateData(newValue, labelSelect);
-		}
+		await updateData(updateWallets.kwanza, labelKwanza);
+		await updateData(updateWallets.eur.toFixed(2), labelEur);
+		await updateData(updateWallets.dollar.toFixed(2), labelDollar);
 	}
 
 	return (
@@ -96,7 +122,7 @@ export default function ConverterCurrency({
                         items-center justify-center rounded-[4px] bg-white px-[15px] font-medium leading-none 
                         shadow-[0_2px_10px] focus:shadow-[0_0_0_2px] focus:shadow-black focus:outline-none"
 					>
-						Converter
+						Carregar Conta
 					</button>
 				</Dialog.Trigger>
 
@@ -110,12 +136,13 @@ export default function ConverterCurrency({
 						"
 					>
 						<Dialog.Title className="text-mauve12 m-0 text-[17px] font-medium">
-							Converter Currency
+							Carregar conta
 						</Dialog.Title>
 
 						<Dialog.Description className="text-mauve11 mt-[10px] mb-5 text-[15px] leading-normal">
-							Convert your currency to another currency. All
-							Transactions are based on the current exchange rate.
+							Insira o valor que deseja carregar na sua conta dolár e
+							euro. O valor da recarga e o IVA serão deduzidos da sua
+							conta em kwanza.
 						</Dialog.Description>
 
 						<div className="flex flex-col lg:flex-row gap-4 mb-[15px]">
@@ -132,39 +159,26 @@ export default function ConverterCurrency({
 							</fieldset>
 
 							<fieldset>
-								<label htmlFor="exchangeRate">Câmbio</label>
+								<label htmlFor="exchangeRateUSD">Câmbio USD</label>
 								<Input
 									type="number"
-									id="exchangeRate"
-									name="exchangeRate"
+									id="exchangeRateUSD"
+									name="exchangeRateUSD"
 									onChange={(
 										e: React.ChangeEvent<HTMLInputElement>,
-									) => setExchangeRate(Number(e.target.value))}
+									) => setExchangeRateUSD(Number(e.target.value))}
 								/>
 							</fieldset>
 
 							<fieldset>
-								<label htmlFor="from">De</label>
-								<Combobox
-									id="from"
-									data={[
-										{
-											label: "🇦🇴 AOA",
-											value: "aoa",
-										},
-									]}
-									state={currencySource}
-									onValueChange={(value) => setCurrencySource(value)}
-								/>
-							</fieldset>
-
-							<fieldset>
-								<label htmlFor="to">Para</label>
-								<Combobox
-									id="to"
-									data={currencies}
-									state={currencyTarget}
-									onValueChange={(value) => setCurrencyTarget(value)}
+								<label htmlFor="exchangeRateEUR">Câmbio EUR</label>
+								<Input
+									type="number"
+									id="exchangeRateEUR"
+									name="exchangeRateEUR"
+									onChange={(
+										e: React.ChangeEvent<HTMLInputElement>,
+									) => setExchangeRateEUR(Number(e.target.value))}
 								/>
 							</fieldset>
 						</div>
@@ -172,28 +186,29 @@ export default function ConverterCurrency({
 						<div className="mt-[25px] w-full flex flex-col gap-4 justify-between">
 							<div className="w-full flex justify-between items-center">
 								<ul className="text-sm font-medium">
-									<li className="mb-4">Valor convertido:</li>
+									<li>Valor USD:</li>
+									<li className="mb-4">Valor EUR:</li>
 									<li>Desconto de Carregamento:</li>
 									<li>Desconto IVA:</li>
 									<li>Desconto Total:</li>
 								</ul>
 
 								<ul className="font-normal text-sm">
-									<li className="mb-4">{amountConverted}</li>
+									<li>{amountConverted.dollar}</li>
+									<li className="mb-4">{amountConverted.eur}</li>
+
 									<li>{infoOperationalCharges.recharge}</li>
 									<li>{infoOperationalCharges.iva}</li>
 									<li>{infoOperationalCharges.total}</li>
 								</ul>
 							</div>
 
-							<button
-								className="bg-green4 text-green11 hover:bg-green5 focus:shadow-green7 
-                                inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] 
-                                font-medium leading-none focus:shadow-[0_0_0_2px] focus:outline-none"
-								onClick={handleConvert}
+							<Button
+								onClick={handleAddBalanceToWallet}
+								aria-label="Add"
 							>
-								Converter
-							</button>
+								Carregar
+							</Button>
 						</div>
 
 						<Dialog.Close asChild>
