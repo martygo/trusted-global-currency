@@ -6,9 +6,8 @@ import { useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 
 import supabaseClient from "@/config/supabase";
-import { currencies } from "@/data/currencies.data";
 
-import Combobox from "components/common/Combobox";
+import Button from "components/common/Button";
 import Icon from "components/common/Icon";
 import Input from "components/common/Input";
 
@@ -32,23 +31,24 @@ export interface BalanceAddProps {
 }
 
 export default function BalanceAdd({ balances }: BalanceAddProps) {
-	const [inputCurrency, setInputCurrency] = useState<number>(0);
-	const [currencySource, setCurrencySource] = useState<string>("");
+	const [inputAmount, setInputAmount] = useState<number>(0);
 
 	const router = useRouter();
 
-	const { eur, dollar, kwanza } = balances;
+	const { kwanza } = balances;
 
-	function getInput(event: React.ChangeEvent<HTMLInputElement>) {
-		const inputCurrency = event.target.value;
+	function getAmountInput(
+		event: React.ChangeEvent<HTMLInputElement>,
+	) {
+		const inputAmount = event.target.value;
 
-		if (inputCurrency === "") {
+		if (inputAmount === "") {
 			console.log("vazio");
 			return;
 		}
 
-		if (inputCurrency.length >= 1) {
-			setInputCurrency(Number(inputCurrency));
+		if (inputAmount.length >= 1) {
+			setInputAmount(Number(inputAmount));
 		}
 	}
 
@@ -71,26 +71,10 @@ export default function BalanceAdd({ balances }: BalanceAddProps) {
 	}
 
 	async function handleAddBalance() {
-		if (currencySource === "eur") {
-			const value = eur.value + inputCurrency;
-			const label = eur.label;
+		const value = kwanza.value + inputAmount;
+		const label = "aoa";
 
-			await postData(value, label);
-		}
-
-		if (currencySource === "usd") {
-			const value = dollar.value + inputCurrency;
-			const label = dollar.label;
-
-			await postData(value, label);
-		}
-
-		if (currencySource === "aoa") {
-			const value = kwanza.value + inputCurrency;
-			const label = kwanza.label;
-
-			await postData(value, label);
-		}
+		await postData(value, label);
 	}
 
 	return (
@@ -108,51 +92,42 @@ export default function BalanceAdd({ balances }: BalanceAddProps) {
 
 				<Dialog.Portal>
 					<Dialog.Overlay className="bg-blackA9 data-[state=open]:animate-overlayShow fixed inset-0" />
-					<Dialog.Content className="data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-[25px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none">
+					<Dialog.Content
+						className="data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] 
+					max-h-[85vh] w-[100vw] max-w-[350px] translate-x-[-50%] translate-y-[-50%]
+					bg-white p-[25px] focus:outline-none rounded-[6px]
+					shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px]"
+					>
 						<Dialog.Title className="text-mauve12 m-0 text-[17px] font-medium">
 							Adicionar Saldo
 						</Dialog.Title>
 
 						<Dialog.Description className="text-mauve11 mt-[10px] mb-5 text-[15px] leading-normal">
-							Adicione saldo a sua conta. Selecione a moeda e o valor
-							onde será adicionado.
+							Adicione saldo a sua conta. Valor será adicionado na sua
+							conta Kwanza.
 						</Dialog.Description>
 
 						<div className="flex gap-4 mb-[15px]">
 							<fieldset>
-								<Input type="number" onChange={getInput} />
+								<Input type="number" onChange={getAmountInput} />
 							</fieldset>
-							<fieldset>
-								<Combobox
-									data={currencies}
-									state={currencySource}
-									onValueChange={(value) => setCurrencySource(value)}
-								/>
-							</fieldset>
-						</div>
 
-						<div className="mt-[25px] flex justify-end">
 							<Dialog.Close asChild>
-								<button
-									className="bg-green4 text-green11 hover:bg-green5 focus:shadow-green7 
-                                inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] 
-                                font-medium leading-none focus:shadow-[0_0_0_2px] focus:outline-none"
-									onClick={handleAddBalance}
-								>
+								<Button onClick={handleAddBalance} aria-label="Add">
 									Adicionar
-								</button>
+								</Button>
 							</Dialog.Close>
 						</div>
 
 						<Dialog.Close asChild>
-							<button
-								className="hover:bg-violet4 focus:shadow-violet7 absolute top-[10px] right-[10px] 
-                                inline-flex h-[25px] w-[25px] appearance-none items-center justify-center 
-                                rounded-full focus:shadow-[0_0_0_2px] focus:outline-none"
+							<Button
+								className="hover:bg-violet4 focus:shadow-violet7 absolute  
+                                inline-flex h-[25px] w-[25px] px-0 top-[10px] right-[10px]
+								appearance-none rounded-full bg-inherit text-inherit"
 								aria-label="Close"
 							>
 								<Icon name="XCircle" size={40} color="red" />
-							</button>
+							</Button>
 						</Dialog.Close>
 					</Dialog.Content>
 				</Dialog.Portal>
